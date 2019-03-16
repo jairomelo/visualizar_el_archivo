@@ -20,7 +20,7 @@ num_pags = int(input('Cantidad de páginas a consultar: '))
 rango = int(num_pags)-2
 pag_rest = int(num_pags)+2
 
-browser = webdriver.Chrome(executable_path=r'bin/chromedriver.exe')
+browser = webdriver.Chrome(executable_path=r'bin/chromedriver')
 browser.get(url)
 
 #########################################################################
