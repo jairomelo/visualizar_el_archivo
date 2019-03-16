@@ -10,7 +10,6 @@ from selenium.webdriver.common.keys import Keys
 from bs4 import BeautifulSoup
 import requests, time, os, urllib, codecs, csv, sys
 import reconex
-import itertools
 
 #########################################################################
 #Ingresar la búsqueda
