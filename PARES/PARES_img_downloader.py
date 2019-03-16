@@ -21,7 +21,7 @@ host = 'http://pares.mcu.es'
 ruta_entrada = '/ParesBusquedas20/catalogo/show/{}'.format(ident)
 url_entrada = '{}{}'.format(host, ruta_entrada)
 
-browser = webdriver.Chrome(executable_path=r'bin/chromedriver')
+browser = webdriver.Chrome()
 browser.get(url_entrada)
 
 #########################################################################
