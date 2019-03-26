@@ -57,9 +57,11 @@ if num_pags == 1:
 			titu = columns.get_text()
 			titulist.append(titu)
 	
+#########################
 ###si el número de págs está entre 2 y 5
+#########################
 
-elif num_pags in range(1,5):
+elif num_pags in range(1,6):
 # page 1
 	soup = BeautifulSoup(browser.page_source, 'html.parser')
 	for em in soup("em"):
@@ -107,8 +109,37 @@ elif num_pags in range(1,5):
 		for columns in titul:
 			titu = columns.get_text()
 			titulist.append(titu)
+	time.sleep(5)
+	# resto de págs //*[@id="resultados"]/div[2]/a[5]
+	for i in range(rango):
+		i = browser.find_element_by_xpath('//*[@id="resultados"]/div[2]/a[{}]'.format(pag_rest))
+		i.click()
+		time.sleep(5)
+		soup = BeautifulSoup(browser.page_source, 'html.parser')
+		for em in soup("em"):
+			soup.em.decompose()
+		caja = soup.select('table.displayTable tbody')
+		for box in caja:
+			total = box.select('p.fecha')
+			for columns in total:
+				fecha = columns.get_text()
+				listado.append(fecha)
+			archi = box.select('p.tipo_archivo')
+			for columns in archi:
+				tip = columns.get_text()
+				tipolist.append(tip)
+			signa = box.select('p.signatura')
+			for columns in signa:
+				signat = columns.get_text()
+				signalist.append(signat)
+			titul = box.select('p.titulo a')
+			for columns in titul:
+				titu = columns.get_text()
+				titulist.append(titu)
 
+#########################
 ### si el número de págs es mayor a 5
+#########################
 
 elif num_pags > 5:
 	# page 1
