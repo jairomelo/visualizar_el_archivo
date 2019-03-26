@@ -14,14 +14,17 @@ import reconex
 #########################################################################
 #Ingresar la búsqueda
 
-url = input('Pega la cadena de búsqueda: ')
-ident = input('Ingresa el nombre del archivo csv: ')
+ident = input('Ingresar la búsqueda (ej: camino+de+Santiago): ')
 num_pags = int(input('Cantidad de páginas a consultar: '))
 rango = int(num_pags)-2
 pag_rest = int(num_pags)+2
 
+host = 'http://pares.mcu.es'
+ruta_entrada = '/ParesBusquedas20/catalogo/find?texto={}'.format(ident)
+url_entrada = '{}{}'.format(host, ruta_entrada)
+
 browser = webdriver.Chrome(executable_path=r'bin/chromedriver.exe')
-browser.get(url)
+browser.get(url_entrada)
 
 #########################################################################
 ## Estos loops hay que convertirlos en una función... pero con un poco más de tiempo :D
@@ -56,10 +59,12 @@ if num_pags == 1:
 		for columns in titul:
 			titu = columns.get_text()
 			titulist.append(titu)
-	
-###si el número de págs está entre 2 y 5
 
-elif num_pags in range(1,5):
+#########################
+###si el número de págs está entre 2 y 5
+#########################
+
+elif num_pags in range(1,6):
 # page 1
 	soup = BeautifulSoup(browser.page_source, 'html.parser')
 	for em in soup("em"):
@@ -107,8 +112,37 @@ elif num_pags in range(1,5):
 		for columns in titul:
 			titu = columns.get_text()
 			titulist.append(titu)
+	time.sleep(5)
+	# resto de págs //*[@id="resultados"]/div[2]/a[5]
+	for i in range(rango):
+		i = browser.find_element_by_xpath('//*[@id="resultados"]/div[2]/a[{}]'.format(pag_rest))
+		i.click()
+		time.sleep(5)
+		soup = BeautifulSoup(browser.page_source, 'html.parser')
+		for em in soup("em"):
+			soup.em.decompose()
+		caja = soup.select('table.displayTable tbody')
+		for box in caja:
+			total = box.select('p.fecha')
+			for columns in total:
+				fecha = columns.get_text()
+				listado.append(fecha)
+			archi = box.select('p.tipo_archivo')
+			for columns in archi:
+				tip = columns.get_text()
+				tipolist.append(tip)
+			signa = box.select('p.signatura')
+			for columns in signa:
+				signat = columns.get_text()
+				signalist.append(signat)
+			titul = box.select('p.titulo a')
+			for columns in titul:
+				titu = columns.get_text()
+				titulist.append(titu)
 
+#########################
 ### si el número de págs es mayor a 5
+#########################
 
 elif num_pags > 5:
 	# page 1
@@ -159,6 +193,7 @@ elif num_pags > 5:
 		for columns in titul:
 			titu = columns.get_text()
 			titulist.append(titu)
+	time.sleep(5)
 	# resto de págs
 	for i in range(rango):
 		i = browser.find_element_by_xpath('//*[@id="resultados"]/div[2]/a[7]')
