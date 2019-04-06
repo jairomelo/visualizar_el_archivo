@@ -1,19 +1,29 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from selenium import webdriver
-from selenium.webdriver.common.keys import Keys
-from bs4 import BeautifulSoup
-import requests, time, os, urllib, codecs
-import reconex # Intento de solución de errores de conexión
+# Librerías standar de Python 3
+import requests, time, os, urllib, codecs, sys
 
+try:
+	from selenium import webdriver
+	from selenium.webdriver.common.keys import Keys
+	from bs4 import BeautifulSoup
+except ImportError:
+	# Verifica la instalación de los módulos requeridos
+	print((os.linesep * 2).join(["No fue posible importar el módulo:", 
+		str(sys.exc_info()[1]), "Debe instalarlo para poder correr el programa [Ver ayuda en: https://programminghistorian.org/es/lecciones/instalar-modulos-python-pip]", "Saliendo del programa..."]))
+	sys.exit(-2)
+
+try:
+	import reconex # Intento de solución de errores de conexión
+except ImportError:
+	# Verifica que se encuentren disponibles los archivos adicionales
+	print(str(sys.exc_info()[1]),"No se encontró el archivo 'reconex.py'. Asegúrese de haberlo descargado y que esté en la carpeta principal del programa")
+	sys.exit(-2)
 
 #########################################################################
 
 ident = input('Ingresar número del expediente: ')
-
-num_imgs = input('cantidad de imágenes: ')
-rango = int(num_imgs)/8
 
 #########################################################################
 
@@ -27,12 +37,23 @@ browser.get(url_entrada)
 #########################################################################
 
 soup = BeautifulSoup(browser.page_source, 'html.parser')
+
+#########################################################################
+## Obtener la cantidad de imágenes y el rango
+
+num_pags = soup.select("span", {"class": "numPag"})
+lines = [span.get_text() for span in num_pags]
+num_imgs = lines[4]
+rango = int(num_imgs)/8
+
+#########################################################################
+## Obtener los enlaces de las imágenes
+
 imgs = soup.select("div.thumbnail img")
 
 rutas = []
 
-#primapágina
-
+#primera página
 for img in imgs:
 	obtener = "{}{}".format(host, img["src"])
 	rutas.append(obtener)
@@ -53,9 +74,7 @@ print(rutas) # Línea sólo para desarrollo
 browser.quit()
 
 #########################################################################
-
-if not os.path.exists('descargas/{}'.format(ident)):
-	os.makedirs('descargas/{}'.format(ident))
+## Manipulación de la lista para crear los enlaces de descarga
 
 cadenas = str(rutas)
 encadenado = ''.join(cadenas).replace('[\'','').replace('\']',',').replace('&txt_transformacion=0','').replace('\'','').replace('&txt_contraste=0', '&txt_zoom=10&txt_contraste=0&txt_polarizado=&txt_brillo=10.0&txt_contrast=1.0')
@@ -63,8 +82,12 @@ mi_cadena = encadenado.split(",")
 print(mi_cadena) # Línea sólo para desarrollo
 
 #########################################################################
+## Crea el directorio y empieza la descarga de imágenes
 
 from datetime import timedelta # solo para desarrollo
+
+if not os.path.exists('descargas/{}'.format(ident)):
+	os.makedirs('descargas/{}'.format(ident))
 
 inicio_loop = time.time() # Desarrollo : tiempo que toma en ejecutarse el programa
 for i in range(len(rutas)):
@@ -85,7 +108,9 @@ lapso_loop = (time.time() - inicio_loop) # Desarrollo : tiempo que toma en ejecu
 horminsec = str(timedelta(seconds=lapso_loop))
 print("Descargadas {} imágenes en {}".format(num_imgs,horminsec))
 
-# obtener página de descripción
+#########################################################################
+# Obtener página de descripción
+
 url_descripcion = '{}/ParesBusquedas20/catalogo/description/{}'.format(host,ident)
 salsa = urllib.request.urlopen(url_descripcion).read()
 sopa = BeautifulSoup(salsa, 'html.parser')

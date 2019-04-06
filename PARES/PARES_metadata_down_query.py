@@ -20,10 +20,6 @@ num_pags = int(input('Cantidad de páginas a consultar: '))
 rango = int(num_pags)-2
 pag_rest = int(num_pags)+2
 
-host = 'http://pares.mcu.es'
-ruta_entrada = '/ParesBusquedas20/catalogo/autfind?texto={}'.format(ident)
-url_entrada = '{}{}'.format(host, ruta_entrada)
-
 browser = webdriver.Chrome(executable_path=r'bin/chromedriver.exe')
 browser.get(url)
 
